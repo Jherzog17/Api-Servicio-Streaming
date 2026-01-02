@@ -4,7 +4,7 @@ from marshmallow import Schema, fields, validate, ValidationError
 from users_bp import users_db
 from suscripciones_db import suscripciones
 
-suscripciones_bp = Blueprint("suscripcion", __name__)
+suscripciones_bp = Blueprint("suscripciones", __name__)
 
 
 class SuscripcionSchema(Schema):

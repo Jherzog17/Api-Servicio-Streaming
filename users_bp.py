@@ -68,7 +68,7 @@ def editar_usuario(id_usuario):
         schema = EditUsersSchema()
         schema.load(data)
     except ValidationError as e:
-        return jsonify({"Error:": e.messages})
+        return jsonify({"Error": e.messages}),400
     usuario = users_db.get(id_usuario)
     if usuario is None:
         return jsonify({"Error": "ID introducido no válido"}),404
