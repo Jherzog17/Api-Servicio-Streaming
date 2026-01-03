@@ -4,6 +4,7 @@ from marshmallow import Schema, fields, validate, ValidationError
 
 from users_bp import users_db
 from historial_db import historial
+from media_db import medios
 
 historial_bp = Blueprint("historial", __name__)
 
@@ -41,6 +42,10 @@ def anadir_al_historial(id_usuario):
         schema.load(data)
     except ValidationError as e:
         return jsonify(e.messages), 400
+
+    # el medio existe ?
+    if data['id_medio_de_streaming'] not in medios:
+        return jsonify({'error': 'El medio de streaming no existe'}), 404
 
     if id_usuario not in users_db:
         return jsonify({'error': 'Usuario no encontrado'}), 404
