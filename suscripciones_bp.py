@@ -55,3 +55,10 @@ def cancelar_suscripcion(id_usuario):
         return jsonify({'error':'No existe suscripcion'}),404
     del suscripciones[id_usuario]
     return jsonify({'mensaje':'suscripcion cancelada'}),200
+
+@suscripciones_bp.route("/usuarios/<id_usuario>/suscripciones", methods=["GET"])
+def get_suscripcion(id_usuario):
+    if id_usuario in suscripciones:
+        return jsonify({"mensaje":suscripciones[id_usuario]}), 200
+    else:
+        return jsonify({"Error": "Suscripción no encontrada o usuario no tiene suscripción activa"}),404

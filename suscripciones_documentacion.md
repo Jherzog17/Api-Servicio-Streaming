@@ -36,7 +36,45 @@ suscripciones = {
 
 ## Endpoints
 
-### 1. Pagar/Activar Suscripción
+### 1. Consultar Suscripción Activa
+
+**Endpoint:** `GET /usuarios/<id_usuario>/suscripciones`
+
+Obtiene la suscripción activa de un usuario específico.
+
+#### Request
+
+**Parámetros de URL:**
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `id_usuario` | `string` | ID del usuario cuya suscripción se quiere consultar |
+
+No requiere body.
+
+#### Responses
+
+**✅ Éxito (200):**
+```json
+{
+    "mensaje": {
+        "id_suscripcion": 1,
+        "tipo": "Premium",
+        "precio": "9.99"
+    }
+}
+```
+
+**❌ Suscripción no encontrada (404):**
+```json
+{
+    "Error": "Suscripción no encontrada o usuario no tiene suscripción activa"
+}
+```
+
+---
+
+### 2. Pagar/Activar Suscripción
 
 **Endpoint:** `POST /usuarios/<id_usuario>/suscripciones`
 
@@ -109,7 +147,54 @@ Content-Type: application/json
 
 ---
 
-### 2. Cancelar Suscripción
+### 3. Modificar Suscripción
+
+**Endpoint:** `PUT /usuarios/<id_usuario>/suscripciones`
+
+Modifica los datos de una suscripción existente.
+
+#### Request
+
+**Headers:**
+```
+Content-Type: application/json
+```
+
+**Parámetros de URL:**
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `id_usuario` | `string` | ID del usuario |
+
+**Body (JSON):**
+```json
+{
+    "id_suscripcion": 2,
+    "tipo": "Premium Plus",
+    "precio": "14.99"
+}
+```
+
+#### Responses
+
+**✅ Éxito (200):**
+```json
+{
+    "suscripcion": {
+        "id_suscripcion": 2,
+        "tipo": "Premium Plus",
+        "precio": "14.99"
+    }
+}
+```
+
+**❌ No encontrado (404):**
+- Usuario no existe
+- Suscripción no existe
+
+---
+
+### 4. Cancelar Suscripción
 
 **Endpoint:** `DELETE /usuarios/<id_usuario>/suscripciones`
 

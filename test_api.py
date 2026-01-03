@@ -133,30 +133,98 @@ def test_delete_user():
 
 # ================= MEDIOS DE STREAMING =================
 
-def test_get_medio():
-    """GET /medio_de_streaming/<id> - Obtener medio por ID"""
-    print("\n--- Obtener Medio de Streaming ---")
+def test_reproducir_medio():
+    """GET /medio_de_streaming/<id> - Reproducir (Obtener) medio por ID"""
+    print("\n--- Reproducir Medio de Streaming ---")
     medio_id = get_input("ID del medio", "1")
     
     response = requests.get(f"{BASE_URL}/medio_de_streaming/{medio_id}")
     print_response(response)
 
 
-def test_list_medios_by_pais():
-    """GET /medio_de_streaming/?pais=<pais> - Listar medios por país"""
-    print("\n--- Listar Medios por País ---")
-    pais = get_input("País", "España")
-    
-    response = requests.get(f"{BASE_URL}/medio_de_streaming/", params={"pais": pais})
+def test_list_all_medios():
+    """GET /medio_de_streaming/ - Listar todos los medios"""
+    print("\n--- Listar Todos los Medios ---")
+    response = requests.get(f"{BASE_URL}/medio_de_streaming/")
     print_response(response)
 
 
-def test_list_medios_by_fecha():
-    """GET /medio_de_streaming/?fecha_subida=<fecha> - Listar medios por fecha"""
-    print("\n--- Listar Medios por Fecha de Subida ---")
-    fecha = get_input("Fecha (YYYY-MM-DD)", "2024-01-15")
+def test_list_medios_con_filtros():
+    """GET /medio_de_streaming/?<params> - Listar medios con filtros"""
+    print("\n--- Listar Medios con Filtros ---")
+    print("Deja vacío el campo si no quieres filtrar por él.")
+    pais = get_input("País", "")
+    fecha = get_input("Fecha de subida (YYYY-MM-DD)", "")
+    num_items = get_input("Número máximo de items", "")
     
-    response = requests.get(f"{BASE_URL}/medio_de_streaming/", params={"fecha_subida": fecha})
+    params = {}
+    if pais:
+        params["pais"] = pais
+    if fecha:
+        params["fecha_subida"] = fecha
+    if num_items:
+        params["num_items"] = num_items
+        
+    if not params:
+        print("⚠️  No has seleccionado ningún filtro, se listarán todos.")
+    
+    response = requests.get(f"{BASE_URL}/medio_de_streaming/", params=params)
+    print_response(response)
+
+
+
+
+
+def test_add_medio():
+    """POST /medio_de_streaming/anadir_medio - Añadir medio de streaming"""
+    print("\n--- Añadir Medio de Streaming ---")
+    
+    id_medio_streaming = get_input("ID numérico del medio", "1")
+    pais = get_input("País", "España")
+    fecha = get_input("Fecha de subida (YYYY-MM-DD)", "2024-01-15")
+    
+    response = requests.post(
+        f"{BASE_URL}/medio_de_streaming/anadir_medio",
+        json={
+            "id_medio_de_streaming": int(id_medio_streaming),
+            "pais": pais,
+            "fecha_de_subida": fecha
+        }
+    )
+    print_response(response)
+
+
+def test_delete_medio():
+    """DELETE /medio_de_streaming/<id> - Eliminar medio de streaming"""
+    print("\n--- Eliminar Medio de Streaming ---")
+    medio_id = get_input("ID del medio a eliminar", "1")
+    
+    confirm = get_input(f"¿Seguro que quieres eliminar el medio {medio_id}? (s/n)", "n")
+    if confirm.lower() != 's':
+        print("Operación cancelada")
+        return
+    
+    response = requests.delete(f"{BASE_URL}/medio_de_streaming/{medio_id}")
+    print_response(response)
+
+
+def test_edit_medio():
+    """PUT /medio_de_streaming/<id> - Editar medio de streaming"""
+    print("\n--- Editar Medio de Streaming ---")
+    medio_id = get_input("ID del medio a editar", "1")
+    
+    id_medio_streaming = get_input("Nuevo ID numérico del medio", "1")
+    pais = get_input("Nuevo país", "México")
+    fecha = get_input("Nueva fecha de subida (YYYY-MM-DD)", "2024-02-20")
+    
+    response = requests.put(
+        f"{BASE_URL}/medio_de_streaming/{medio_id}",
+        json={
+            "id_medio_de_streaming": int(id_medio_streaming),
+            "pais": pais,
+            "fecha_de_subida": fecha
+        }
+    )
     print_response(response)
 
 
@@ -202,6 +270,20 @@ def test_add_historial():
 
 # ================= SUSCRIPCIONES =================
 
+def test_get_suscripcion():
+    """GET /usuarios/<id>/suscripciones - Consultar suscripción activa"""
+    global last_user_id
+    print("\n--- Consultar Suscripción Activa ---")
+    
+    user_id = get_input("ID del usuario", last_user_id or "")
+    if not user_id:
+        print("❌ Debes proporcionar un ID de usuario")
+        return
+    
+    response = requests.get(f"{BASE_URL}/usuarios/{user_id}/suscripciones")
+    print_response(response)
+
+
 def test_pagar_suscripcion():
     """POST /usuarios/<id>/suscripciones - Pagar/Activar suscripción"""
     global last_user_id
@@ -217,6 +299,31 @@ def test_pagar_suscripcion():
     precio = get_input("Precio", "9.99")
     
     response = requests.post(
+        f"{BASE_URL}/usuarios/{user_id}/suscripciones",
+        json={
+            "id_suscripcion": int(id_suscripcion),
+            "tipo": tipo,
+            "precio": precio
+        }
+    )
+    print_response(response)
+
+
+def test_modificar_suscripcion():
+    """PUT /usuarios/<id>/suscripciones - Modificar suscripción"""
+    global last_user_id
+    print("\n--- Modificar Suscripción ---")
+    
+    user_id = get_input("ID del usuario", last_user_id or "")
+    if not user_id:
+        print("❌ Debes proporcionar un ID de usuario")
+        return
+    
+    id_suscripcion = get_input("Nuevo ID de suscripción", "2")
+    tipo = get_input("Nuevo tipo de suscripción", "Premium Plus")
+    precio = get_input("Nuevo precio", "14.99")
+    
+    response = requests.put(
         f"{BASE_URL}/usuarios/{user_id}/suscripciones",
         json={
             "id_suscripcion": int(id_suscripcion),
@@ -277,9 +384,12 @@ def show_users_menu():
 def show_media_menu():
     """Menú de endpoints de medios."""
     print("\n--- 🎥 ENDPOINTS DE MEDIOS ---\n")
-    print("  1. Obtener medio por ID (GET /medio_de_streaming/<id>)")
-    print("  2. Listar medios por país (GET /medio_de_streaming/?pais=...)")
-    print("  3. Listar medios por fecha (GET /medio_de_streaming/?fecha_subida=...)")
+    print("  1. Reproducir medio (GET /medio_de_streaming/<id>)")
+    print("  2. Listar TODOS los medios (GET /medio_de_streaming/)")
+    print("  3. Listar medios con filtros (País, Fecha, Límite)")
+    print("  4. Añadir medio (POST /medio_de_streaming/anadir_medio)")
+    print("  5. Eliminar medio (DELETE /medio_de_streaming/<id>)")
+    print("  6. Editar medio (PUT /medio_de_streaming/<id>)")
     print("  0. ⬅️  Volver al menú principal")
     print()
 
@@ -296,8 +406,10 @@ def show_historial_menu():
 def show_suscripciones_menu():
     """Menú de endpoints de suscripciones."""
     print("\n--- 💳 ENDPOINTS DE SUSCRIPCIONES ---\n")
-    print("  1. Pagar/Activar suscripción (POST /usuarios/<id>/suscripciones)")
-    print("  2. Cancelar suscripción (DELETE /usuarios/<id>/suscripciones)")
+    print("  1. Consultar suscripción activa (GET /usuarios/<id>/suscripciones)")
+    print("  2. Pagar/Activar suscripción (POST /usuarios/<id>/suscripciones)")
+    print("  3. Modificar suscripción (PUT /usuarios/<id>/suscripciones)")
+    print("  4. Cancelar suscripción (DELETE /usuarios/<id>/suscripciones)")
     print("  0. ⬅️  Volver al menú principal")
     print()
 
@@ -333,11 +445,17 @@ def handle_media_menu():
         choice = get_input("Selecciona una opción", "0")
         
         if choice == "1":
-            test_get_medio()
+            test_reproducir_medio()
         elif choice == "2":
-            test_list_medios_by_pais()
+            test_list_all_medios()
         elif choice == "3":
-            test_list_medios_by_fecha()
+            test_list_medios_con_filtros()
+        elif choice == "4":
+            test_add_medio()
+        elif choice == "5":
+            test_delete_medio()
+        elif choice == "6":
+            test_edit_medio()
         elif choice == "0":
             break
         else:
@@ -371,8 +489,12 @@ def handle_suscripciones_menu():
         choice = get_input("Selecciona una opción", "0")
         
         if choice == "1":
-            test_pagar_suscripcion()
+            test_get_suscripcion()
         elif choice == "2":
+            test_pagar_suscripcion()
+        elif choice == "3":
+            test_modificar_suscripcion()
+        elif choice == "4":
             test_cancelar_suscripcion()
         elif choice == "0":
             break

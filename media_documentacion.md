@@ -14,7 +14,7 @@ La base de datos de medios se almacena en memoria como un diccionario Python con
 
 ```python
 medios = {
-    "id_medio_de_streaming": {
+    1: {
         "pais": "nombre_pais",
         "fecha_de_subida": "YYYY-MM-DD"
     }
@@ -23,9 +23,9 @@ medios = {
 
 | Campo | Tipo | Descripción |
 |-------|------|-------------|
-| `id_medio_de_streaming` (clave) | `string` | Identificador único del medio de streaming |
+| `id_medio_de_streaming` (clave) | `integer` | Identificador único del medio de streaming |
 | `pais` | `string` | País de origen o disponibilidad del medio |
-| `fecha_de_subida` | `date` | Fecha en que se subió el medio (formato: YYYY-MM-DD) |
+| `fecha_de_subida` | `string` | Fecha en que se subió el medio (formato: YYYY-MM-DD) |
 
 > [!IMPORTANT]
 > Los datos se almacenan en memoria, por lo que se pierden al reiniciar el servidor.
@@ -34,21 +34,75 @@ medios = {
 
 ## Endpoints
 
-### 1. Reproducir Medio de Streaming
+### 1. Listar Medios (con Filtros)
+
+**Endpoint:** `GET /medio_de_streaming/`
+
+Devuelve una lista de medios de streaming. Puede devolver todos los medios o filtrar por país, fecha de subida y limitar el número de resultados.
+
+#### Request
+
+**Query Parameters:**
+
+| Parámetro | Tipo | Requerido | Descripción |
+|-----------|------|-----------|-------------|
+| `pais` | `string` | ❌ No | Filtra los medios por nombre de país (case-insensitive) |
+| `fecha_subida` | `string` | ❌ No | Filtra los medios por fecha de subida (YYYY-MM-DD) |
+| `num_items` | `int` | ❌ No | Limita el número de resultados (solo funciona junto con `fecha_subida`) |
+
+**Ejemplos de URL:**
+- Todos: `GET /medio_de_streaming/`
+- Por País: `GET /medio_de_streaming/?pais=España`
+- Por Fecha: `GET /medio_de_streaming/?fecha_subida=2024-01-15`
+- Por Fecha con Límite: `GET /medio_de_streaming/?fecha_subida=2024-01-15&num_items=5`
+
+#### Responses
+
+**✅ Éxito (200):**
+```json
+{
+    "medio_de_streaming": [
+        {
+            "id_medio_de_streaming": "abc123",
+            "medio": {
+                "pais": "España",
+                "fecha_de_subida": "2024-01-15"
+            }
+        }
+    ]
+}
+```
+*Si no hay filtros, devuelve el diccionario completo de medios.*
+
+**❌ No encontrado (404):**
+```json
+{
+    "error": "No hay medios de streaming en ese país"
+}
+```
+*Ocurre si no hay coincidencias para el filtro aplicado.*
+
+**❌ Error de validación (400):**
+```json
+{
+    "Error": "num_items debe ser entero"
+}
+```
+
+---
+
+### 2. Obtener Medio por ID (Reproducir)
 
 **Endpoint:** `GET /medio_de_streaming/<id_medio_de_streaming>`
 
-Obtiene la información de un medio de streaming específico por su ID.
+Obtiene la información de un medio específico para reproducirlo.
 
 #### Request
 
 **Parámetros de URL:**
-
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
-| `id_medio_de_streaming` | `string` | ID del medio de streaming a consultar |
-
-No requiere body.
+| `id_medio_de_streaming` | `integer` | ID del medio a consultar |
 
 #### Responses
 
@@ -71,130 +125,83 @@ No requiere body.
 
 ---
 
-### 2. Lista de Medios por País
+### 3. Añadir Medio
 
-**Endpoint:** `GET /medio_de_streaming/?pais=<nombre_pais>`
+**Endpoint:** `POST /medio_de_streaming/anadir_medio`
 
-Devuelve todos los medios de streaming disponibles en un país específico.
+Añade un nuevo medio de streaming. El ID se envía en el cuerpo JSON, no en la URL.
 
 #### Request
 
-**Query Parameters:**
-
-| Parámetro | Tipo | Requerido | Descripción |
-|-----------|------|-----------|-------------|
-| `pais` | `string` | ✅ Sí | Nombre del país para filtrar los medios |
-
-**Ejemplo de URL:**
-```
-GET /medio_de_streaming/?pais=España
-```
-
-No requiere body.
-
-#### Responses
-
-**✅ Éxito (200):**
+**Body (JSON):**
 ```json
 {
-    "medio_de_streaming": [
-        {
-            "id_medio_de_streaming": "abc123",
-            "medio": {
-                "pais": "España",
-                "fecha_de_subida": "2024-01-15"
-            }
-        },
-        {
-            "id_medio_de_streaming": "def456",
-            "medio": {
-                "pais": "España",
-                "fecha_de_subida": "2024-02-20"
-            }
-        }
-    ]
+    "id_medio_de_streaming": 1,
+    "pais": "España",
+    "fecha_de_subida": "2024-01-15"
 }
 ```
 
-**❌ Falta parámetro país (404):**
+**✅ Éxito (201):**
 ```json
 {
-    "error": "Falta en la cadena de consulta ?pais=nombre_pais"
+    "Mensaje": "Medio de streaming añadido"
 }
 ```
-
-**❌ No hay medios en ese país (404):**
-```json
-{
-    "error": "No hay medios de streaming en ese pais"
-}
-```
-
-> [!NOTE]
-> La búsqueda por país es case-insensitive (no distingue mayúsculas/minúsculas).
 
 ---
 
-### 3. Lista de Medios por Fecha de Subida
+### 4. Editar Medio
 
-**Endpoint:** `GET /medio_de_streaming/?fecha_subida=<fecha>`
+**Endpoint:** `PUT /medio_de_streaming/<id_medio_de_streaming>`
 
-Devuelve todos los medios de streaming subidos en una fecha específica.
+Modifica los datos de un medio existente.
 
 #### Request
 
-**Query Parameters:**
-
-| Parámetro | Tipo | Requerido | Descripción |
-|-----------|------|-----------|-------------|
-| `fecha_subida` | `string` | ✅ Sí | Fecha de subida para filtrar los medios |
-
-**Ejemplo de URL:**
-```
-GET /medio_de_streaming/?fecha_subida=2024-01-15
+**Body (JSON):**
+```json
+{
+    "id_medio_de_streaming": 1,
+    "pais": "Nuevo País",
+    "fecha_de_subida": "2024-02-20"
+}
 ```
 
-No requiere body.
+**✅ Éxito (200):**
+```json
+{
+    "mensaje": "Medio de streaming editado"
+}
+```
+
+---
+
+### 5. Eliminar Medio
+
+**Endpoint:** `DELETE /medio_de_streaming/<id_medio_de_streaming>`
+
+Elimina un medio de streaming.
 
 #### Responses
 
 **✅ Éxito (200):**
 ```json
 {
-    "medio_de_streaming": [
-        {
-            "id_medio_de_streaming": "abc123",
-            "medio": {
-                "pais": "España",
-                "fecha_de_subida": "2024-01-15"
-            }
-        }
-    ]
+    "Mensaje": "Medio de streaming eliminado"
 }
 ```
 
-**❌ Falta parámetro fecha_subida:**
+**❌ Medio no encontrado (404):**
 ```json
 {
-    "error": "Falta en la cadena de consulta ?fecha_subida=fecha"
+    "Error": "Medio no encontrado"
 }
 ```
-
-**❌ No hay medios con esa fecha (404):**
-```json
-{
-    "error": "No hay medios de streaming con esa fecha de subida"
-}
-```
-
-> [!WARNING]
-> Actualmente, los endpoints de lista por país y lista por fecha están duplicados con la misma ruta (`GET /`). Esto puede causar conflictos ya que Flask solo ejecutará el primer endpoint registrado.
 
 ---
 
 ## Esquemas de Validación
-
-El módulo utiliza **Marshmallow** para validar los datos de entrada:
 
 ### MediaSchema
 ```python
@@ -203,31 +210,3 @@ class MediaSchema(Schema):
     pais = fields.Str(required=True)
     fecha_de_subida = fields.Date(required=True)
 ```
-
-| Campo | Tipo | Requerido | Descripción |
-|-------|------|-----------|-------------|
-| `id_medio_de_streaming` | `integer` | ✅ Sí | ID del medio de streaming |
-| `pais` | `string` | ✅ Sí | País de origen o disponibilidad |
-| `fecha_de_subida` | `date` | ✅ Sí | Fecha de subida del medio |
-
----
-
-## Dependencias
-
-| Librería | Uso |
-|----------|-----|
-| `Flask` | Framework web |
-| `marshmallow` | Validación de esquemas |
-| `media_db` | Almacenamiento de datos de medios |
-
----
-
-## Notas Adicionales
-
-> [!CAUTION]
-> Se detectó un posible error en el código: en la función `reproducir_medio_de_streaming`, se utiliza `media_bp.get()` en lugar de `medios.get()`. Esto causará un error ya que `media_bp` es un Blueprint y no tiene el método `get()`.
-
-Prompt utilizado 
-
-Crea un documneto md como el de @users_documentacion.md pero para @media_bp.py
- 
