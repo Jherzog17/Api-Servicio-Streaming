@@ -95,7 +95,9 @@ Devuelve una lista de medios de streaming. Puede devolver todos los medios o fil
 
 **Endpoint:** `GET /medio_de_streaming/<id_medio_de_streaming>`
 
-Obtiene la información de un medio específico para reproducirlo.
+🔐 **Requiere Token JWT**
+
+Obtiene la información de un medio específico para reproducirlo. Requiere autenticación.
 
 #### Request
 

@@ -35,6 +35,13 @@ def get_input(prompt, default=None):
     return input(f"{prompt}: ").strip()
 
 
+def get_auth_headers():
+    """Devuelve los headers de autorización si hay token."""
+    if token:
+        return {"Authorization": f"Bearer {token}"}
+    return {}
+
+
 # ================= USUARIOS =================
 
 def test_register_user():
@@ -82,9 +89,13 @@ def test_get_users():
 
 
 def test_edit_user():
-    """PUT /usuarios/<id_usuario> - Editar usuario"""
-    global last_user_id
-    print("\n--- Editar Usuario ---")
+    """PUT /usuarios/<id_usuario> - Editar usuario [🔐 Requiere Token]"""
+    global last_user_id, token
+    print("\n--- Editar Usuario [🔐 JWT] ---")
+    
+    if not token:
+        print("⚠️  No hay token. Haz login primero.")
+        return
     
     user_id = get_input("ID del usuario", last_user_id or "")
     if not user_id:
@@ -107,15 +118,20 @@ def test_edit_user():
     
     response = requests.put(
         f"{BASE_URL}/usuarios/{user_id}",
-        json=data
+        json=data,
+        headers=get_auth_headers()
     )
     print_response(response)
 
 
 def test_delete_user():
-    """DELETE /usuarios/<id_usuario> - Eliminar usuario"""
-    global last_user_id
-    print("\n--- Eliminar Usuario ---")
+    """DELETE /usuarios/<id_usuario> - Eliminar usuario [🔐 Requiere Token]"""
+    global last_user_id, token
+    print("\n--- Eliminar Usuario [🔐 JWT] ---")
+    
+    if not token:
+        print("⚠️  No hay token. Haz login primero.")
+        return
     
     user_id = get_input("ID del usuario a eliminar", last_user_id or "")
     if not user_id:
@@ -127,18 +143,30 @@ def test_delete_user():
         print("Operación cancelada")
         return
     
-    response = requests.delete(f"{BASE_URL}/usuarios/{user_id}")
+    response = requests.delete(
+        f"{BASE_URL}/usuarios/{user_id}",
+        headers=get_auth_headers()
+    )
     print_response(response)
 
 
 # ================= MEDIOS DE STREAMING =================
 
 def test_reproducir_medio():
-    """GET /medio_de_streaming/<id> - Reproducir (Obtener) medio por ID"""
-    print("\n--- Reproducir Medio de Streaming ---")
+    """GET /medio_de_streaming/<id> - Reproducir medio [🔐 Requiere Token]"""
+    global token
+    print("\n--- Reproducir Medio de Streaming [🔐 JWT] ---")
+    
+    if not token:
+        print("⚠️  No hay token. Haz login primero.")
+        return
+    
     medio_id = get_input("ID del medio", "1")
     
-    response = requests.get(f"{BASE_URL}/medio_de_streaming/{medio_id}")
+    response = requests.get(
+        f"{BASE_URL}/medio_de_streaming/{medio_id}",
+        headers=get_auth_headers()
+    )
     print_response(response)
 
 
@@ -231,23 +259,34 @@ def test_edit_medio():
 # ================= HISTORIAL =================
 
 def test_get_historial():
-    """GET /usuarios/<id>/historial - Obtener historial de usuario"""
-    global last_user_id
-    print("\n--- Obtener Historial ---")
+    """GET /usuarios/<id>/historial - Obtener historial [🔐 Requiere Token]"""
+    global last_user_id, token
+    print("\n--- Obtener Historial [🔐 JWT] ---")
+    
+    if not token:
+        print("⚠️  No hay token. Haz login primero.")
+        return
     
     user_id = get_input("ID del usuario", last_user_id or "")
     if not user_id:
         print("❌ Debes proporcionar un ID de usuario")
         return
     
-    response = requests.get(f"{BASE_URL}/usuarios/{user_id}/historial")
+    response = requests.get(
+        f"{BASE_URL}/usuarios/{user_id}/historial",
+        headers=get_auth_headers()
+    )
     print_response(response)
 
 
 def test_add_historial():
-    """POST /usuarios/<id>/historial - Añadir al historial"""
-    global last_user_id
-    print("\n--- Añadir al Historial ---")
+    """POST /usuarios/<id>/historial - Añadir al historial [🔐 Requiere Token]"""
+    global last_user_id, token
+    print("\n--- Añadir al Historial [🔐 JWT] ---")
+    
+    if not token:
+        print("⚠️  No hay token. Haz login primero.")
+        return
     
     user_id = get_input("ID del usuario", last_user_id or "")
     if not user_id:
@@ -263,7 +302,8 @@ def test_add_historial():
     
     response = requests.post(
         f"{BASE_URL}/usuarios/{user_id}/historial",
-        json=data
+        json=data,
+        headers=get_auth_headers()
     )
     print_response(response)
 
@@ -271,23 +311,34 @@ def test_add_historial():
 # ================= SUSCRIPCIONES =================
 
 def test_get_suscripcion():
-    """GET /usuarios/<id>/suscripciones - Consultar suscripción activa"""
-    global last_user_id
-    print("\n--- Consultar Suscripción Activa ---")
+    """GET /usuarios/<id>/suscripciones - Consultar suscripción [🔐 Requiere Token]"""
+    global last_user_id, token
+    print("\n--- Consultar Suscripción Activa [🔐 JWT] ---")
+    
+    if not token:
+        print("⚠️  No hay token. Haz login primero.")
+        return
     
     user_id = get_input("ID del usuario", last_user_id or "")
     if not user_id:
         print("❌ Debes proporcionar un ID de usuario")
         return
     
-    response = requests.get(f"{BASE_URL}/usuarios/{user_id}/suscripciones")
+    response = requests.get(
+        f"{BASE_URL}/usuarios/{user_id}/suscripciones",
+        headers=get_auth_headers()
+    )
     print_response(response)
 
 
 def test_pagar_suscripcion():
-    """POST /usuarios/<id>/suscripciones - Pagar/Activar suscripción"""
-    global last_user_id
-    print("\n--- Pagar Suscripción ---")
+    """POST /usuarios/<id>/suscripciones - Pagar suscripción [🔐 Requiere Token]"""
+    global last_user_id, token
+    print("\n--- Pagar Suscripción [🔐 JWT] ---")
+    
+    if not token:
+        print("⚠️  No hay token. Haz login primero.")
+        return
     
     user_id = get_input("ID del usuario", last_user_id or "")
     if not user_id:
@@ -304,15 +355,20 @@ def test_pagar_suscripcion():
             "id_suscripcion": int(id_suscripcion),
             "tipo": tipo,
             "precio": precio
-        }
+        },
+        headers=get_auth_headers()
     )
     print_response(response)
 
 
 def test_modificar_suscripcion():
-    """PUT /usuarios/<id>/suscripciones - Modificar suscripción"""
-    global last_user_id
-    print("\n--- Modificar Suscripción ---")
+    """PUT /usuarios/<id>/suscripciones - Modificar suscripción [🔐 Requiere Token]"""
+    global last_user_id, token
+    print("\n--- Modificar Suscripción [🔐 JWT] ---")
+    
+    if not token:
+        print("⚠️  No hay token. Haz login primero.")
+        return
     
     user_id = get_input("ID del usuario", last_user_id or "")
     if not user_id:
@@ -329,15 +385,20 @@ def test_modificar_suscripcion():
             "id_suscripcion": int(id_suscripcion),
             "tipo": tipo,
             "precio": precio
-        }
+        },
+        headers=get_auth_headers()
     )
     print_response(response)
 
 
 def test_cancelar_suscripcion():
-    """DELETE /usuarios/<id>/suscripciones - Cancelar suscripción"""
-    global last_user_id
-    print("\n--- Cancelar Suscripción ---")
+    """DELETE /usuarios/<id>/suscripciones - Cancelar suscripción [🔐 Requiere Token]"""
+    global last_user_id, token
+    print("\n--- Cancelar Suscripción [🔐 JWT] ---")
+    
+    if not token:
+        print("⚠️  No hay token. Haz login primero.")
+        return
     
     user_id = get_input("ID del usuario", last_user_id or "")
     if not user_id:
@@ -349,7 +410,10 @@ def test_cancelar_suscripcion():
         print("Operación cancelada")
         return
     
-    response = requests.delete(f"{BASE_URL}/usuarios/{user_id}/suscripciones")
+    response = requests.delete(
+        f"{BASE_URL}/usuarios/{user_id}/suscripciones",
+        headers=get_auth_headers()
+    )
     print_response(response)
 
 

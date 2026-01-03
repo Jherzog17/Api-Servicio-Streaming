@@ -40,7 +40,9 @@ suscripciones = {
 
 **Endpoint:** `GET /usuarios/<id_usuario>/suscripciones`
 
-Obtiene la suscripción activa de un usuario específico.
+🔐 **Requiere Token JWT**
+
+Obtiene la suscripción activa de un usuario específico. Solo el propio usuario puede consultar su suscripción.
 
 #### Request
 
@@ -78,7 +80,9 @@ No requiere body.
 
 **Endpoint:** `POST /usuarios/<id_usuario>/suscripciones`
 
-Registra o activa una suscripción para un usuario específico.
+🔐 **Requiere Token JWT**
+
+Registra o activa una suscripción para un usuario específico. Solo el propio usuario puede pagar su suscripción.
 
 #### Request
 
@@ -151,7 +155,9 @@ Content-Type: application/json
 
 **Endpoint:** `PUT /usuarios/<id_usuario>/suscripciones`
 
-Modifica los datos de una suscripción existente.
+🔐 **Requiere Token JWT**
+
+Modifica los datos de una suscripción existente. Solo el propio usuario puede modificar su suscripción.
 
 #### Request
 
@@ -198,7 +204,9 @@ Content-Type: application/json
 
 **Endpoint:** `DELETE /usuarios/<id_usuario>/suscripciones`
 
-Cancela la suscripción activa de un usuario.
+🔐 **Requiere Token JWT**
+
+Cancela la suscripción activa de un usuario. Solo el propio usuario puede cancelar su suscripción.
 
 #### Request
 

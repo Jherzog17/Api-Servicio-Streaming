@@ -40,7 +40,9 @@ historial = {
 
 **Endpoint:** `GET /usuarios/<id_usuario>/historial`
 
-Devuelve el historial de visualización de un usuario específico.
+🔐 **Requiere Token JWT**
+
+Devuelve el historial de visualización de un usuario específico. Solo el propio usuario puede ver su historial.
 
 #### Request
 
@@ -80,7 +82,9 @@ No requiere body.
 
 **Endpoint:** `POST /usuarios/<id_usuario>/historial`
 
-Añade un nuevo registro de visualización al historial de un usuario.
+🔐 **Requiere Token JWT**
+
+Añade un nuevo registro de visualización al historial de un usuario. Solo el propio usuario puede añadir a su historial.
 
 #### Request
 

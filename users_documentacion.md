@@ -185,7 +185,9 @@ No requiere body ni parámetros.
 
 **Endpoint:** `PUT /usuarios/<id_usuario>`
 
-Edita los datos de un usuario existente.
+🔐 **Requiere Token JWT**
+
+Edita los datos de un usuario existente. Solo el propio usuario puede editar su cuenta.
 
 #### Request
 
@@ -245,7 +247,9 @@ Content-Type: application/json
 
 **Endpoint:** `DELETE /usuarios/<id_usuario>`
 
-Elimina un usuario del sistema.
+🔐 **Requiere Token JWT**
+
+Elimina un usuario del sistema. Solo el propio usuario puede eliminarse.
 
 #### Request
 

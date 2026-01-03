@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request, Blueprint
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from marshmallow import Schema, fields, validate, ValidationError
 
 from users_bp import users_db
@@ -11,7 +12,12 @@ class HistorialItemSchema(Schema):
     fecha_visualizacion = fields.Date(required=False)
 
 @historial_bp.route("/usuarios/<id_usuario>/historial", methods=["GET"])
+@jwt_required()
 def consultar_historial(id_usuario):
+    current_user = get_jwt_identity()
+    if current_user != id_usuario:
+        return jsonify({"error": "No autorizado para ver este historial"}), 403
+    
     # usuario existe ¿
     if id_usuario not in users_db:
         return jsonify({'error': 'Usuario no encontrado'}), 404
@@ -21,7 +27,12 @@ def consultar_historial(id_usuario):
     return jsonify({"historial": lista_historial}), 200
 
 @historial_bp.route("/usuarios/<id_usuario>/historial", methods=["POST"])
+@jwt_required()
 def anadir_al_historial(id_usuario):
+    current_user = get_jwt_identity()
+    if current_user != id_usuario:
+        return jsonify({"error": "No autorizado para modificar este historial"}), 403
+    
     data = request.get_json()
     if not data:
         return jsonify({'error': 'Missing JSON'}), 400

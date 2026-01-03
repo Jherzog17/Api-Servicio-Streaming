@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request, Blueprint
+from flask_jwt_extended import jwt_required
 from marshmallow import Schema, fields, validate, ValidationError
 from datetime import datetime
 from media_db import medios
@@ -11,6 +12,7 @@ class MediaSchema(Schema):
     fecha_de_subida=fields.Date(required=True)
 
 @media_bp.route("/<int:id_medio_de_streaming>", methods=["GET"])
+@jwt_required()
 def reproducir_medio_de_streaming(id_medio_de_streaming):
     data=medios.get(id_medio_de_streaming)
     if not data:

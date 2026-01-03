@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, Blueprint
-from flask_jwt_extended import JWTManager, create_access_token
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
 from marshmallow import Schema, fields, validate, ValidationError
@@ -62,7 +62,12 @@ def obtener_usuarios():
 
 
 @users_bp.route("/<string:id_usuario>", methods=["PUT"])
+@jwt_required()
 def editar_usuario(id_usuario):
+    current_user = get_jwt_identity()
+    if current_user != id_usuario:
+        return jsonify({"Error": "No autorizado para editar este usuario"}), 403
+    
     data = request.get_json()
     try:
         schema = EditUsersSchema()
@@ -84,7 +89,12 @@ def editar_usuario(id_usuario):
 
 
 @users_bp.route("/<string:id_usuario>", methods=["DELETE"])
+@jwt_required()
 def eliminar_usuario(id_usuario):
+    current_user = get_jwt_identity()
+    if current_user != id_usuario:
+        return jsonify({"Error": "No autorizado para eliminar este usuario"}), 403
+    
     existe_id = users_db.get(id_usuario)
     if existe_id is not None:
         del users_db[id_usuario]

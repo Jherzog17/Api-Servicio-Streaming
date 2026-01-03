@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request, Blueprint
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from marshmallow import Schema, fields, validate, ValidationError
 
 from users_bp import users_db
@@ -13,8 +14,13 @@ class SuscripcionSchema(Schema):
     precio=fields.Str(required=True)
 
 @suscripciones_bp.route("/usuarios/<id_usuario>/suscripciones", methods=["POST"])
+@jwt_required()
 def pagar_suscripcion(id_usuario):
+    current_user = get_jwt_identity()
     id_usuario=str(id_usuario)
+    if current_user != id_usuario:
+        return jsonify({"error": "No autorizado"}), 403
+    
     data=request.get_json()
     if not data:
         return jsonify({'error':'Missing JSON'}), 400
@@ -29,8 +35,13 @@ def pagar_suscripcion(id_usuario):
     return jsonify({"suscripcion":data}),200
 
 @suscripciones_bp.route("/usuarios/<id_usuario>/suscripciones", methods=["PUT"])
+@jwt_required()
 def modificar_suscripcion(id_usuario):
+    current_user = get_jwt_identity()
     id_usuario = str(id_usuario)
+    if current_user != id_usuario:
+        return jsonify({"error": "No autorizado"}), 403
+    
     data = request.get_json()
     if not data:
         return jsonify({'error': 'Missing JSON'}), 400
@@ -47,8 +58,13 @@ def modificar_suscripcion(id_usuario):
     return jsonify({"suscripcion": data}), 200
 
 @suscripciones_bp.route("/usuarios/<id_usuario>/suscripciones", methods=["DELETE"])
+@jwt_required()
 def cancelar_suscripcion(id_usuario):
+    current_user = get_jwt_identity()
     id_usuario = str(id_usuario)
+    if current_user != id_usuario:
+        return jsonify({"error": "No autorizado"}), 403
+    
     if id_usuario not in users_db:
         return jsonify({'error':'No existe usuario'}), 404
     if id_usuario not in suscripciones:
@@ -57,7 +73,12 @@ def cancelar_suscripcion(id_usuario):
     return jsonify({'mensaje':'suscripcion cancelada'}),200
 
 @suscripciones_bp.route("/usuarios/<id_usuario>/suscripciones", methods=["GET"])
+@jwt_required()
 def get_suscripcion(id_usuario):
+    current_user = get_jwt_identity()
+    if current_user != id_usuario:
+        return jsonify({"error": "No autorizado"}), 403
+    
     if id_usuario in suscripciones:
         return jsonify({"mensaje":suscripciones[id_usuario]}), 200
     else:
