@@ -28,6 +28,24 @@ def pagar_suscripcion(id_usuario):
     suscripciones[id_usuario]=data
     return jsonify({"suscripcion":data}),200
 
+@suscripciones_bp.route("/usuarios/<id_usuario>/suscripciones", methods=["PUT"])
+def modificar_suscripcion(id_usuario):
+    id_usuario = str(id_usuario)
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Missing JSON'}), 400
+    if id_usuario not in users_db:
+        return jsonify({'error':'No existe usuario'}), 404
+    if id_usuario not in suscripciones:
+        return jsonify({'error': 'No existe suscripcion'}), 404
+    try:
+        schema=SuscripcionSchema()
+        schema.load(data)
+    except ValidationError as e:
+        return jsonify(e.messages),400
+    suscripciones[id_usuario] = data
+    return jsonify({"suscripcion": data}), 200
+
 @suscripciones_bp.route("/usuarios/<id_usuario>/suscripciones", methods=["DELETE"])
 def cancelar_suscripcion(id_usuario):
     id_usuario = str(id_usuario)
