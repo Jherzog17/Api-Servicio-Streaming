@@ -8,14 +8,10 @@
 
 ## Integrantes del Grupo
 
-| Nombre | Rol |
-|--------|-----|
-| *[Nombre del integrante 1]* | Desarrollo y documentación |
-| *[Nombre del integrante 2]* | Desarrollo y testing |
-| *[Nombre del integrante 3]* | Desarrollo y revisión |
-| *[Nombre del integrante 4]* | Desarrollo y coordinación |
-
-> **Nota:** Completar con los nombres reales de los integrantes del grupo.
+Jorge García Herzog
+Irene Cerezo Macías
+Raul Guijarro Colomar
+Alba Contreras Lopez
 
 ---
 
