@@ -1,6 +1,6 @@
 # Memoria - API de Servicio de Streaming
 
-**Asignatura:** Representación de Interés Creativo  
+**Asignatura:** Representación e intercambio de datos
 **Curso:** 2025-2026  
 **Fecha:** 7 de enero de 2026
 
