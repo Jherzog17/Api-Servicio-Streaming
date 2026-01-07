@@ -46,6 +46,11 @@ Devuelve el historial de visualización de un usuario específico. Solo el propi
 
 #### Request
 
+**Headers:**
+```
+Authorization: Bearer <token_jwt>
+```
+
 **Parámetros de URL:**
 
 | Parámetro | Tipo | Descripción |
@@ -67,6 +72,14 @@ No requiere body.
     ]
 }
 ```
+
+**❌ No autorizado (403):**
+```json
+{
+    "error": "No autorizado para ver este historial"
+}
+```
+*Ocurre si intentas ver el historial de otro usuario.*
 
 **❌ Usuario no encontrado (404):**
 ```json
@@ -91,6 +104,7 @@ Añade un nuevo registro de visualización al historial de un usuario. Solo el p
 **Headers:**
 ```
 Content-Type: application/json
+Authorization: Bearer <token_jwt>
 ```
 
 **Parámetros de URL:**
@@ -127,12 +141,28 @@ Content-Type: application/json
 }
 ```
 
+**❌ No autorizado (403):**
+```json
+{
+    "error": "No autorizado para modificar este historial"
+}
+```
+*Ocurre si intentas modificar el historial de otro usuario.*
+
 **❌ Usuario no encontrado (404):**
 ```json
 {
     "error": "Usuario no encontrado"
 }
 ```
+
+**❌ Medio no existe (404):**
+```json
+{
+    "error": "El medio de streaming no existe"
+}
+```
+*Ocurre si el `id_medio_de_streaming` no existe en `medios`.*
 
 **❌ Falta JSON o JSON inválido (400):**
 ```json
@@ -170,9 +200,11 @@ class HistorialItemSchema(Schema):
 | Librería | Uso |
 |----------|-----|
 | `Flask` | Framework web |
+| `flask_jwt_extended` | Autenticación con tokens JWT |
 | `marshmallow` | Validación de esquemas |
 | `users_bp` | Verificación de existencia de usuarios (`users_db`) |
 | `historial_db` | Almacenamiento del historial |
+| `media_db` | Verificación de existencia de medios (`medios`) |
 
 
 # Prompt Utilizado 

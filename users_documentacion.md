@@ -194,6 +194,7 @@ Edita los datos de un usuario existente. Solo el propio usuario puede editar su 
 **Headers:**
 ```
 Content-Type: application/json
+Authorization: Bearer <token_jwt>
 ```
 
 **Parámetros de URL:**
@@ -234,6 +235,14 @@ Content-Type: application/json
 }
 ```
 
+**❌ No autorizado (403):**
+```json
+{
+    "Error": "No autorizado para editar este usuario"
+}
+```
+*Ocurre si intentas editar los datos de otro usuario.*
+
 **❌ Sin campos para cambiar (409):**
 ```json
 {
@@ -253,6 +262,11 @@ Elimina un usuario del sistema. Solo el propio usuario puede eliminarse.
 
 #### Request
 
+**Headers:**
+```
+Authorization: Bearer <token_jwt>
+```
+
 **Parámetros de URL:**
 
 | Parámetro | Tipo | Descripción |
@@ -269,6 +283,14 @@ No requiere body.
     "mensaje": "Usuario eliminado con éxito"
 }
 ```
+
+**❌ No autorizado (403):**
+```json
+{
+    "Error": "No autorizado para eliminar este usuario"
+}
+```
+*Ocurre si intentas eliminar los datos de otro usuario.*
 
 **❌ Usuario no encontrado (404):**
 ```json

@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Memoria - API de Servicio de Streaming</title>
+        <style>
+        @page {
+            margin: 2cm;
+            size: A4;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px;
+            color: #333;
+            background: #fff;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            border-bottom: 2px solid #bdc3c7;
+            padding-bottom: 8px;
+            margin-top: 35px;
+            page-break-after: avoid;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 25px;
+            page-break-after: avoid;
+        }
+        h4 {
+            color: #7f8c8d;
+            margin-top: 20px;
+        }
+        .header-info {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 15px 0;
+            page-break-inside: avoid;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        pre, code {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            padding: 15px;
+            overflow-x: auto;
+            page-break-inside: avoid;
+        }
+        code {
+            padding: 2px 6px;
+        }
+        pre code {
+            border: none;
+            padding: 0;
+        }
+        .endpoint-tree {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: monospace;
+            white-space: pre;
+            line-height: 1.4;
+        }
+        .note {
+            background: #e8f6ff;
+            border-left: 4px solid #3498db;
+            padding: 10px 15px;
+            margin: 15px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px 15px;
+            margin: 15px 0;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 10px 15px;
+            margin: 15px 0;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #eee;
+            margin: 30px 0;
+        }
+        .jwt-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+        }
+        @media print {
+            body {
+                padding: 0;
+            }
+            pre {
+                white-space: pre-wrap;
+                word-wrap: break-word;
+            }
+        }
+    </style>
+    </head>
+    <body>
+
+        <h1>Memoria - API de Servicio de Streaming</h1>
+
+        <hr>
+
+        <h2>Integrantes del Grupo</h2>
+
+        <table>
+            <tr>
+                <th>Nombre</th>
+                <th>Rol</th>
+            </tr>
+            <tr>
+                <td><em>Jorge García</em></td>
+                <td>Usuarios</td>
+            </tr>
+            <tr>
+                <td><em>Raúl Guijaro</em></td>
+                <td>Historial</td>
+            </tr>
+            <tr>
+                <td><em>Alba Contreras</em></td>
+                <td>Suscripciones</td>
+            </tr>
+            <tr>
+                <td><em>Irene Cerezo</em></td>
+                <td>Media</td>
+            </tr>
+        </table>
+
+        <hr>
+
+        <h2>a) Scripts Desarrollados</h2>
+
+        <p>El proyecto está compuesto por los siguientes scripts:</p>
+
+        <h3>1. <code>backend.py</code> - Servidor Principal</h3>
+
+        <p><strong>Descripción:</strong> Archivo principal de la aplicación
+            Flask que inicializa el servidor y registra todos los
+            blueprints.</p>
+
+        <p><strong>Contenido:</strong></p>
+        <ul>
+            <li>Configuración de Flask y JWT</li>
+            <li>Registro de blueprints con sus prefijos de URL:
+                <ul>
+                    <li><code>/usuarios</code> → <code>users_bp</code></li>
+                    <li><code>/medio_de_streaming</code> →
+                        <code>media_bp</code></li>
+                    <li><code>historial_bp</code> (sin prefijo)</li>
+                    <li><code>suscripciones_bp</code> (sin prefijo)</li>
+                </ul>
+            </li>
+        </ul>
+
+        <pre><code>from flask import Flask
+from flask_jwt_extended import JWTManager
+from users_bp import users_bp
+from media_bp import media_bp
+from historial_bp import historial_bp
+from suscripciones_bp import suscripciones_bp
+import os
+
+app = Flask(__name__)
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+jwt = JWTManager(app)
+
+app.register_blueprint(users_bp, url_prefix="/usuarios")
+app.register_blueprint(media_bp, url_prefix="/medio_de_streaming")
+app.register_blueprint(historial_bp)
+app.register_blueprint(suscripciones_bp)</code></pre>
+
+        <hr>
+
+        <h3>2. <code>users_bp.py</code> - Blueprint de Usuarios</h3>
+
+        <p><strong>Descripción:</strong> Gestiona todas las operaciones
+            relacionadas con usuarios: registro, login, edición y
+            eliminación.</p>
+
+        <p><strong>Características principales:</strong></p>
+        <ul>
+            <li><strong>Autenticación JWT:</strong> Generación de tokens para
+                login</li>
+            <li><strong>Hash de contraseñas:</strong> Uso de
+                <code>werkzeug.security</code></li>
+            <li><strong>Validación con Marshmallow:</strong> Schemas
+                <code>UsersSchema</code> y <code>EditUsersSchema</code></li>
+            <li><strong>Generación de IDs únicos:</strong> Uso de
+                <code>uuid.uuid4().hex</code></li>
+        </ul>
+
+        <p><strong>Endpoints:</strong></p>
+        <ul>
+            <li><code>POST /usuarios/register</code> - Registro de usuarios</li>
+            <li><code>POST /usuarios/login</code> - Inicio de sesión (devuelve
+                JWT)</li>
+            <li><code>GET /usuarios/</code> - Listar usuarios</li>
+            <li><code>PUT /usuarios/&lt;id&gt;</code> - Editar usuario <span
+                    class="jwt-badge">🔐 JWT</span></li>
+            <li><code>DELETE /usuarios/&lt;id&gt;</code> - Eliminar usuario
+                <span class="jwt-badge">🔐 JWT</span></li>
+        </ul>
+
+        <hr>
+
+        <h3>3. <code>media_bp.py</code> - Blueprint de Medios</h3>
+
+        <p><strong>Descripción:</strong> Gestiona la colección de medios de
+            streaming (películas, series, etc.).</p>
+
+        <p><strong>Endpoints:</strong></p>
+        <ul>
+            <li><code>GET /medio_de_streaming/</code> - Listar medios (con
+                filtros opcionales)</li>
+            <li><code>GET /medio_de_streaming/&lt;id&gt;</code> - Reproducir
+                medio <span class="jwt-badge">🔐 JWT</span></li>
+            <li><code>POST /medio_de_streaming/anadir_medio</code> - Añadir
+                medio</li>
+            <li><code>PUT /medio_de_streaming/&lt;id&gt;</code> - Editar
+                medio</li>
+            <li><code>DELETE /medio_de_streaming/&lt;id&gt;</code> - Eliminar
+                medio</li>
+        </ul>
+
+        <hr>
+
+        <h3>4. <code>historial_bp.py</code> - Blueprint de Historial</h3>
+
+        <p><strong>Descripción:</strong> Gestiona el historial de visualización
+            de cada usuario.</p>
+
+        <p><strong>Endpoints:</strong></p>
+        <ul>
+            <li><code>GET /usuarios/&lt;id&gt;/historial</code> - Consultar
+                historial <span class="jwt-badge">🔐 JWT</span></li>
+            <li><code>POST /usuarios/&lt;id&gt;/historial</code> - Añadir al
+                historial <span class="jwt-badge">🔐 JWT</span></li>
+        </ul>
+
+        <hr>
+
+        <h3>5. <code>suscripciones_bp.py</code> - Blueprint de
+            Suscripciones</h3>
+
+        <p><strong>Descripción:</strong> Gestiona las suscripciones de los
+            usuarios.</p>
+
+        <p><strong>Endpoints:</strong></p>
+        <ul>
+            <li><code>GET /usuarios/&lt;id&gt;/suscripciones</code> - Consultar
+                suscripción <span class="jwt-badge">🔐 JWT</span></li>
+            <li><code>POST /usuarios/&lt;id&gt;/suscripciones</code> - Pagar
+                suscripción <span class="jwt-badge">🔐 JWT</span></li>
+            <li><code>PUT /usuarios/&lt;id&gt;/suscripciones</code> - Modificar
+                suscripción <span class="jwt-badge">🔐 JWT</span></li>
+            <li><code>DELETE /usuarios/&lt;id&gt;/suscripciones</code> -
+                Cancelar suscripción <span class="jwt-badge">🔐 JWT</span></li>
+        </ul>
+
+        <hr>
+
+        <h3>6. Bases de Datos en Memoria</h3>
+
+        <table>
+            <tr>
+                <th>Archivo</th>
+                <th>Variable</th>
+                <th>Descripción</th>
+            </tr>
+            <tr>
+                <td><code>users_bp.py</code></td>
+                <td><code>users_db</code></td>
+                <td>Diccionario de usuarios</td>
+            </tr>
+            <tr>
+                <td><code>media_db.py</code></td>
+                <td><code>medios</code></td>
+                <td>Diccionario de medios</td>
+            </tr>
+            <tr>
+                <td><code>historial_db.py</code></td>
+                <td><code>historial</code></td>
+                <td>Diccionario de historiales</td>
+            </tr>
+            <tr>
+                <td><code>suscripciones_db.py</code></td>
+                <td><code>suscripciones</code></td>
+                <td>Diccionario de suscripciones</td>
+            </tr>
+        </table>
+
+        <hr>
+
+        <h3>7. <code>test_api.py</code> - Cliente de Pruebas</h3>
+
+        <p><strong>Descripción:</strong> Script interactivo para probar todos
+            los endpoints de la API.</p>
+
+        <p><strong>Características:</strong></p>
+        <ul>
+            <li>Menú interactivo con opciones numeradas</li>
+            <li>Gestión automática de tokens JWT</li>
+            <li>Pruebas individuales para cada endpoint</li>
+            <li>Formateo de respuestas JSON</li>
+        </ul>
+
+        <hr>
+
+        <h2>b) Árbol de Endpoints</h2>
+
+        <div class="endpoint-tree">API de Streaming (http://127.0.0.1:5000)
+            │
+            ├── /usuarios
+            │ ├── POST /register → Registrar usuario
+            │ ├── POST /login → Iniciar sesión (devuelve JWT)
+            │ ├── GET / → Listar usuarios
+            │ ├── PUT /&lt;id_usuario&gt; → Editar usuario [🔐 JWT]
+            │ ├── DELETE /&lt;id_usuario&gt; → Eliminar usuario [🔐 JWT]
+            │ │
+            │ ├── /&lt;id_usuario&gt;/historial
+            │ │ ├── GET → Consultar historial [🔐 JWT]
+            │ │ └── POST → Añadir al historial [🔐 JWT]
+            │ │
+            │ └── /&lt;id_usuario&gt;/suscripciones
+            │ ├── GET → Consultar suscripción [🔐 JWT]
+            │ ├── POST → Pagar suscripción [🔐 JWT]
+            │ ├── PUT → Modificar suscripción [🔐 JWT]
+            │ └── DELETE → Cancelar suscripción [🔐 JWT]
+            │
+            └── /medio_de_streaming
+            ├── GET / → Listar medios
+            │ ?pais=... → Filtrar por país
+            │ ?fecha_subida=... → Filtrar por fecha
+            │ ?num_items=... → Limitar resultados
+            ├── GET /&lt;id&gt; → Reproducir medio [🔐 JWT]
+            ├── POST /anadir_medio → Añadir medio
+            ├── PUT /&lt;id&gt; → Editar medio
+            └── DELETE /&lt;id&gt; → Eliminar medio</div>
+
+        <hr>
+
+        <h2>c) Operaciones Implementadas</h2>
+
+        <h3>c.1) Usuarios</h3>
+
+        <h4>Registrar Usuario</h4>
+
+        <p><strong>Endpoint:</strong> <code>POST /usuarios/register</code></p>
+
+        <p><strong>Código implementado:</strong></p>
+        <pre><code>@users_bp.route("/register", methods=["POST"])
+def register():
+    data = request.get_json()
+    if not data:
+        return jsonify({"Error": "JSON vacío..."}), 400
+    
+    try:
+        schema = UsersSchema()
+        schema.load(data)
+    except ValidationError as e:
+        return jsonify({"Error": e.messages}), 409
+    
+    id_usuario = uuid.uuid4().hex
+    contrasena_codificada = generate_password_hash(data["password"])
+    users_db[id_usuario] = {"nickname": data["nickname"], 
+                           "password": contrasena_codificada}
+    
+    return jsonify({"Mensaje": "Usuario registrado correctamente"}), 200</code></pre>
+
+        <p><strong>Decisiones de diseño:</strong></p>
+        <ul>
+            <li>Se genera un UUID aleatorio para garantizar unicidad</li>
+            <li>La contraseña se hashea con <code>werkzeug.security</code> para
+                seguridad</li>
+            <li>Se valida el schema con Marshmallow antes de procesar</li>
+        </ul>
+
+        <p><strong>Test con terminal:</strong></p>
+        <pre><code>curl -X POST http://127.0.0.1:5000/usuarios/register \
+  -H "Content-Type: application/json" \
+  -d '{"nickname": "test_user", "password": "test123"}'
+
+# Respuesta: {"Mensaje": "Usuario registrado correctamente"}</code></pre>
+
+        <hr>
+
+        <h4>Login de Usuario</h4>
+
+        <p><strong>Endpoint:</strong> <code>POST /usuarios/login</code></p>
+
+        <pre><code>@users_bp.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    # Validación...
+    for id, valor in users_db.items():
+        if users_db.get(id).get("nickname") == data["nickname"]:
+            if check_password_hash(users_db[id]["password"], data["password"]): 
+                access_token = create_access_token(identity=id)
+                return jsonify({"token": access_token}), 200
+    return jsonify({'Error': 'Usuario no encontrado'}), 404</code></pre>
+
+        <p><strong>Decisiones:</strong> El token JWT se genera usando el
+            <code>id_usuario</code> como identidad.</p>
+
+        <hr>
+
+        <h4>Editar Usuario <span class="jwt-badge">🔐 JWT</span></h4>
+
+        <p><strong>Endpoint:</strong> <code>PUT
+                /usuarios/&lt;id_usuario&gt;</code></p>
+
+        <pre><code>@users_bp.route("/&lt;string:id_usuario&gt;", methods=["PUT"])
+@jwt_required()
+def editar_usuario(id_usuario):
+    current_user = get_jwt_identity()
+    if current_user != id_usuario:
+        return jsonify({"Error": "No autorizado..."}), 403
+    # Actualización de campos...</code></pre>
+
+        <p><strong>Decisiones:</strong> Solo el propio usuario puede editar su
+            cuenta (verificación JWT).</p>
+
+        <hr>
+
+        <h3>c.2) Medios de Streaming</h3>
+
+        <h4>Listar Medios (con Filtros)</h4>
+
+        <p><strong>Endpoint:</strong> <code>GET
+                /medio_de_streaming/?pais=...&amp;fecha_subida=...&amp;num_items=...</code></p>
+
+        <pre><code>@media_bp.route("/", methods=["GET"])
+def listar_medios():
+    pais = request.args.get("pais")
+    fecha_subida = request.args.get("fecha_subida")
+    num_items = request.args.get("num_items")
+    
+    if pais:
+        # Filtrar por país (case-insensitive)
+        ...
+    if fecha_subida:
+        # Filtrar por fecha, aplicar num_items
+        ...
+    return jsonify(medios), 200</code></pre>
+
+        <hr>
+
+        <h4>Reproducir Medio <span class="jwt-badge">🔐 JWT</span></h4>
+
+        <p><strong>Endpoint:</strong> <code>GET
+                /medio_de_streaming/&lt;id&gt;</code></p>
+
+        <pre><code>@media_bp.route("/&lt;int:id_medio_de_streaming&gt;", methods=["GET"])
+@jwt_required()
+def reproducir_medio_de_streaming(id_medio_de_streaming):
+    data = medios.get(id_medio_de_streaming)
+    if not data:
+        return jsonify({'error': 'Medio not found'}), 404
+    return jsonify({"medio_de_streaming": data}), 200</code></pre>
+
+        <hr>
+
+        <h3>c.3) Historial</h3>
+
+        <h4>Añadir al Historial <span class="jwt-badge">🔐 JWT</span></h4>
+
+        <pre><code>@historial_bp.route("/usuarios/&lt;id_usuario&gt;/historial", methods=["POST"])
+@jwt_required()
+def anadir_al_historial(id_usuario):
+    # Verificación de autorización
+    if current_user != id_usuario:
+        return jsonify({"error": "No autorizado..."}), 403
+    
+    # Verificar que el medio existe
+    if data['id_medio_de_streaming'] not in medios:
+        return jsonify({'error': 'El medio no existe'}), 404
+    
+    historial[id_usuario].append(data)
+    return jsonify({"mensaje": "Añadido al historial"}), 201</code></pre>
+
+        <hr>
+
+        <h3>c.4) Suscripciones</h3>
+
+        <h4>Pagar Suscripción <span class="jwt-badge">🔐 JWT</span></h4>
+
+        <pre><code>@suscripciones_bp.route("/usuarios/&lt;id_usuario&gt;/suscripciones", methods=["POST"])
+@jwt_required()
+def pagar_suscripcion(id_usuario):
+    # Verificación JWT...
+    suscripciones[id_usuario] = data
+    return jsonify({"suscripcion": data}), 200</code></pre>
+
+        <hr>
+
+        <h2>d) Problemas Encontrados y Soluciones</h2>
+
+        <h3>Problemas Corregidos ✅</h3>
+
+        <table>
+            <tr>
+                <th>#</th>
+                <th>Problema</th>
+                <th>Solución</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td><strong>Rutas duplicadas en
+                        <code>media_bp.py</code></strong> - 3 funciones con la
+                    misma ruta GET <code>/</code></td>
+                <td>Se combinaron en una sola función
+                    <code>listar_medios()</code></td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td><strong>Método HTTP incorrecto</strong> -
+                    <code>editar_medio</code> usaba DELETE</td>
+                <td>Se cambió a PUT</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td><strong>Función huérfana</strong> sin decorador de ruta</td>
+                <td>Se integró en <code>listar_medios()</code></td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td><strong>Typo <code>.lower</code></strong> sin
+                    paréntesis</td>
+                <td>Se corrigió a <code>.lower()</code></td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td><strong>Uso incorrecto</strong> de
+                    <code>media_bp.get()</code></td>
+                <td>Se cambió a <code>medios.get(id)</code></td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td><strong>Rutas inconsistentes</strong> en
+                    <code>backend.py</code></td>
+                <td>Se quitaron prefijos incorrectos</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td><strong>URLs incorrectas</strong> en
+                    <code>test_api.py</code></td>
+                <td>Se actualizaron todas las URLs</td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td><strong>Typo en clave</strong> <code>"Error:"</code></td>
+                <td>Se corrigió a <code>"Error"</code></td>
+            </tr>
+        </table>
+
+        <h3>Advertencias Pendientes ⚠️</h3>
+
+        <table>
+            <tr>
+                <th>#</th>
+                <th>Advertencia</th>
+                <th>Estado</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td><strong>Datos en memoria</strong> - Se pierden al
+                    reiniciar</td>
+                <td>Intencional para simplificar</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td><strong>JWT_SECRET_KEY puede ser None</strong></td>
+                <td>Documentar configuración</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td><strong>Contraseñas hasheadas expuestas</strong> en GET
+                    /usuarios/</td>
+                <td>Filtrar en producción</td>
+            </tr>
+        </table>
+
+        <hr>
+
+        <h2>e) Modificaciones Respecto a la P3</h2>
+
+        <h3>Cambios Implementados</h3>
+
+        <table>
+            <tr>
+                <th>Diseño Original (P3)</th>
+                <th>Implementación Final</th>
+                <th>Justificación</th>
+            </tr>
+            <tr>
+                <td><code>/suscripcion/&lt;id&gt;</code></td>
+                <td><code>/usuarios/&lt;id&gt;/suscripciones</code></td>
+                <td>Más RESTful, suscripción es subrecurso</td>
+            </tr>
+            <tr>
+                <td><code>/usuario/...</code> (singular)</td>
+                <td><code>/usuarios/...</code> (plural)</td>
+                <td>Consistencia con convenciones REST</td>
+            </tr>
+            <tr>
+                <td>ID numérico de usuario</td>
+                <td>UUID de usuario</td>
+                <td>Mayor seguridad y unicidad</td>
+            </tr>
+            <tr>
+                <td>POST en <code>/medio/&lt;id&gt;</code></td>
+                <td>POST en <code>/anadir_medio</code></td>
+                <td>Evitar confusión con GET</td>
+            </tr>
+        </table>
+
+        <h3>Funcionalidades Adicionales</h3>
+
+        <ul>
+            <li><strong>Autenticación JWT</strong> - Seguridad para endpoints
+                sensibles</li>
+            <li><strong>Validación con Marshmallow</strong> - Schemas para
+                validar entrada</li>
+            <li><strong>Hash de contraseñas</strong> - Seguridad adicional</li>
+            <li><strong>Script de pruebas interactivo</strong> -
+                <code>test_api.py</code></li>
+        </ul>
+
+        <h3>Funcionalidades No Implementadas</h3>
+
+        <table>
+            <tr>
+                <th>Funcionalidad de P3</th>
+                <th>Motivo</th>
+            </tr>
+            <tr>
+                <td>Filtrado por rango de fechas</td>
+                <td>Simplificación, solo fecha exacta</td>
+            </tr>
+            <tr>
+                <td>Paginación en <code>/usuarios</code></td>
+                <td>No prioritario para MVP</td>
+            </tr>
+        </table>
+
+        <hr>
+
+        <h2>Anexo: Ejecutar la API</h2>
+
+        <h3>Requisitos</h3>
+        <pre><code>pip install flask flask-jwt-extended marshmallow werkzeug</code></pre>
+
+        <h3>Variables de Entorno</h3>
+        <pre><code>export JWT_SECRET_KEY="tu_clave_secreta"</code></pre>
+
+        <h3>Iniciar Servidor</h3>
+        <pre><code>python backend.py</code></pre>
+
+        <h3>Ejecutar Tests</h3>
+        <pre><code>python test_api.py</code></pre>
+
+        <hr>
+
+        <p style="text-align: center; color: #666; font-style: italic;">
+            Documento generado el 7 de enero de 2026
+        </p>
+
+    </body>
+</html>

@@ -46,6 +46,11 @@ Obtiene la suscripción activa de un usuario específico. Solo el propio usuario
 
 #### Request
 
+**Headers:**
+```
+Authorization: Bearer <token_jwt>
+```
+
 **Parámetros de URL:**
 
 | Parámetro | Tipo | Descripción |
@@ -66,6 +71,14 @@ No requiere body.
     }
 }
 ```
+
+**❌ No autorizado (403):**
+```json
+{
+    "error": "No autorizado"
+}
+```
+*Ocurre si intentas consultar la suscripción de otro usuario.*
 
 **❌ Suscripción no encontrada (404):**
 ```json
@@ -89,6 +102,7 @@ Registra o activa una suscripción para un usuario específico. Solo el propio u
 **Headers:**
 ```
 Content-Type: application/json
+Authorization: Bearer <token_jwt>
 ```
 
 **Parámetros de URL:**
@@ -124,6 +138,14 @@ Content-Type: application/json
     }
 }
 ```
+
+**❌ No autorizado (403):**
+```json
+{
+    "error": "No autorizado"
+}
+```
+*Ocurre si intentas pagar la suscripción de otro usuario.*
 
 **❌ Usuario no encontrado (404):**
 ```json
@@ -194,9 +216,17 @@ Content-Type: application/json
 }
 ```
 
+**❌ No autorizado (403):**
+```json
+{
+    "error": "No autorizado"
+}
+```
+*Ocurre si intentas modificar la suscripción de otro usuario.*
+
 **❌ No encontrado (404):**
-- Usuario no existe
-- Suscripción no existe
+- Usuario no existe: `{"error": "No existe usuario"}`
+- Suscripción no existe: `{"error": "No existe suscripcion"}`
 
 ---
 
@@ -226,6 +256,14 @@ No requiere body.
     "mensaje": "suscripcion cancelada"
 }
 ```
+
+**❌ No autorizado (403):**
+```json
+{
+    "error": "No autorizado"
+}
+```
+*Ocurre si intentas cancelar la suscripción de otro usuario.*
 
 **❌ Usuario no encontrado (404):**
 ```json
@@ -270,6 +308,7 @@ class SuscripcionSchema(Schema):
 | Librería | Uso |
 |----------|-----|
 | `Flask` | Framework web |
+| `flask_jwt_extended` | Autenticación con tokens JWT |
 | `marshmallow` | Validación de esquemas |
 | `users_bp` | Verificación de existencia de usuarios (`users_db`) |
 | `suscripciones_db` | Almacenamiento de suscripciones |

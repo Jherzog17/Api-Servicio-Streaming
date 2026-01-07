@@ -101,6 +101,11 @@ Obtiene la información de un medio específico para reproducirlo. Requiere aute
 
 #### Request
 
+**Headers:**
+```
+Authorization: Bearer <token_jwt>
+```
+
 **Parámetros de URL:**
 | Parámetro | Tipo | Descripción |
 |-----------|------|-------------|
@@ -117,6 +122,14 @@ Obtiene la información de un medio específico para reproducirlo. Requiere aute
     }
 }
 ```
+
+**❌ No autorizado (401/422):**
+```json
+{
+    "msg": "Missing Authorization Header"
+}
+```
+*Ocurre si no se proporciona el token JWT.*
 
 **❌ Medio no encontrado (404):**
 ```json
