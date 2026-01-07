@@ -8,9 +8,9 @@
 
 ## Integrantes del Grupo
 
-Jorge García Herzog
-Irene Cerezo Macías
-Raul Guijarro Colomar
+Jorge García Herzog //
+Irene Cerezo Macías //
+Raul Guijarro Colomar //
 Alba Contreras Lopez
 
 ---
