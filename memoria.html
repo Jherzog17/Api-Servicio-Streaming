@@ -379,250 +379,130 @@ app.register_blueprint(suscripciones_bp)</code></pre>
 
         <hr>
 
+
         <h2>c) Operaciones Implementadas</h2>
 
         <h3>c.1) Usuarios</h3>
 
-        <h4>Registrar Usuario</h4>
-
+        <h4>1. Registrar Usuario</h4>
         <p><strong>Endpoint:</strong> <code>POST /usuarios/register</code></p>
-
-        <p><strong>Código implementado:</strong></p>
-        <pre><code>@users_bp.route("/register", methods=["POST"])
-def register():
-    data = request.get_json()
-    if not data:
-        return jsonify({"Error": "JSON vacío..."}), 400
-    
-    try:
-        schema = UsersSchema()
-        schema.load(data)
-    except ValidationError as e:
-        return jsonify({"Error": e.messages}), 409
-    
-    id_usuario = uuid.uuid4().hex
-    contrasena_codificada = generate_password_hash(data["password"])
-    users_db[id_usuario] = {"nickname": data["nickname"], 
-                           "password": contrasena_codificada}
-    
-    return jsonify({"Mensaje": "Usuario registrado correctamente"}), 200</code></pre>
-
-        <p><strong>Decisiones de diseño:</strong></p>
-        <ul>
-            <li>Se genera un UUID aleatorio para garantizar unicidad</li>
-            <li>La contraseña se hashea con <code>werkzeug.security</code> para
-                seguridad</li>
-            <li>Se valida el schema con Marshmallow antes de procesar</li>
-        </ul>
-
-        <p><strong>Test con terminal:</strong></p>
-        <pre><code>curl -X POST http://127.0.0.1:5000/usuarios/register \
-  -H "Content-Type: application/json" \
-  -d '{"nickname": "test_user", "password": "test123"}'
-
-# Respuesta: {"Mensaje": "Usuario registrado correctamente"}</code></pre>
-
+        <p><strong>Explicación:</strong> Se implementa el registro validando los datos con Marshmallow y hasheando la contraseña antes de guardarla.</p>
+        <p><strong>Captura de funcionamiento:</strong></p>
+        <img src="capturas/Captura desde 2026-01-12 11-19-06.png" alt="Registro de Usuario" style="max-width: 100%; border: 1px solid #ddd;">
         <hr>
 
-        <h4>Login de Usuario</h4>
-
+        <h4>2. Login de Usuario</h4>
         <p><strong>Endpoint:</strong> <code>POST /usuarios/login</code></p>
-
-        <pre><code>@users_bp.route("/login", methods=["POST"])
-def login():
-    data = request.get_json()
-    # Validación...
-    for id, valor in users_db.items():
-        if users_db.get(id).get("nickname") == data["nickname"]:
-            if check_password_hash(users_db[id]["password"], data["password"]): 
-                access_token = create_access_token(identity=id)
-                return jsonify({"token": access_token}), 200
-    return jsonify({'Error': 'Usuario no encontrado'}), 404</code></pre>
-
-        <p><strong>Decisiones:</strong> El token JWT se genera usando el
-            <code>id_usuario</code> como identidad.</p>
-
+        <p><strong>Explicación:</strong> Se verifica la contraseña hasheada y se genera un token JWT para la sesión.</p>
+        <p><strong>Captura de funcionamiento:</strong></p>
+        <img src="capturas/Captura desde 2026-01-12 11-19-46.png" alt="Login de Usuario" style="max-width: 100%; border: 1px solid #ddd;">
         <hr>
 
-        <h4>Editar Usuario <span class="jwt-badge">🔐 JWT</span></h4>
+        <h4>3. Listar Usuarios</h4>
+        <p><strong>Endpoint:</strong> <code>GET /usuarios/</code></p>
+        <p><strong>Explicación:</strong> Devuelve la lista completa de usuarios registrados.</p>
+        <p><strong>Captura de funcionamiento:</strong></p>
+        <img src="capturas/Captura desde 2026-01-12 11-20-00.png" alt="Listar Usuarios" style="max-width: 100%; border: 1px solid #ddd;">
+        <hr>
 
-        <p><strong>Endpoint:</strong> <code>PUT
-                /usuarios/&lt;id_usuario&gt;</code></p>
+        <h4>4. Editar Usuario <span class="jwt-badge">🔐 JWT</span></h4>
+        <p><strong>Endpoint:</strong> <code>PUT /usuarios/&lt;id&gt;</code></p>
+        <p><strong>Explicación:</strong> Permite modificar datos del usuario, requiriendo autenticación JWT y validación.</p>
+        <p><strong>Captura de funcionamiento:</strong></p>
+        <img src="capturas/Captura desde 2026-01-12 11-21-12.png" alt="Editar Usuario" style="max-width: 100%; border: 1px solid #ddd;">
+        <hr>
 
-        <pre><code>@users_bp.route("/&lt;string:id_usuario&gt;", methods=["PUT"])
-@jwt_required()
-def editar_usuario(id_usuario):
-    current_user = get_jwt_identity()
-    if current_user != id_usuario:
-        return jsonify({"Error": "No autorizado..."}), 403
-    # Actualización de campos...</code></pre>
-
-        <p><strong>Decisiones:</strong> Solo el propio usuario puede editar su
-            cuenta (verificación JWT).</p>
-
+        <h4>5. Eliminar Usuario <span class="jwt-badge">🔐 JWT</span></h4>
+        <p><strong>Endpoint:</strong> <code>DELETE /usuarios/&lt;id&gt;</code></p>
+        <p><strong>Explicación:</strong> Elimina un usuario del sistema previa verificación de token.</p>
+        <p><strong>Captura de funcionamiento:</strong></p>
+        <img src="capturas/Captura desde 2026-01-12 11-22-04.png" alt="Eliminar Usuario" style="max-width: 100%; border: 1px solid #ddd;">
         <hr>
 
         <h3>c.2) Medios de Streaming</h3>
-
-        <h4>Listar Medios (con Filtros)</h4>
-
-        <p><strong>Endpoint:</strong> <code>GET
-                /medio_de_streaming/?pais=...&amp;fecha_subida=...&amp;num_items=...</code></p>
-
-        <pre><code>@media_bp.route("/", methods=["GET"])
-def listar_medios():
-    pais = request.args.get("pais")
-    fecha_subida = request.args.get("fecha_subida")
-    num_items = request.args.get("num_items")
-    
-    if pais:
-        # Filtrar por país (case-insensitive)
-        ...
-    if fecha_subida:
-        # Filtrar por fecha, aplicar num_items
-        ...
-    return jsonify(medios), 200</code></pre>
-
+        
+        <h4>3. Añadir Medio</h4>
+        <p><strong>Endpoint:</strong> <code>POST /medio_de_streaming/anadir_medio</code></p>
+        <p><strong>Explicación:</strong> Agrega un nuevo título al catálogo.</p>
+        <p><strong>Captura de funcionamiento:</strong></p>
+        <img src="capturas/Captura desde 2026-01-12 11-22-54.png" alt="Añadir Medio" style="max-width: 100%; border: 1px solid #ddd;">
+        <hr>
+        
+        <h4>1. Listar todos los Medios</h4>
+        <p><strong>Endpoint:</strong> <code>GET /medio_de_streaming/</code></p>
+        <p><strong>Explicación:</strong> Muestra el catálogo de medios disponibles.</p>
+        <p><strong>Captura de funcionamiento:</strong></p>
+        <img src="capturas/Captura desde 2026-01-12 11-23-11.png" alt="Listar Medios" style="max-width: 100%; border: 1px solid #ddd;">
         <hr>
 
-        <h4>Reproducir Medio <span class="jwt-badge">🔐 JWT</span></h4>
+        <h4>1. Listar Medios con filtro</h4>
+        <p><strong>Endpoint:</strong> <code>GET /medio_de_streaming/</code></p>
+        <p><strong>Explicación:</strong> Muestra el catálogo de medios disponibles con posibilidad de filtrado.</p>
+        <p><strong>Captura de funcionamiento:</strong></p>
+        <img src="capturas/Captura desde 2026-01-12 11-23-44.png" alt="Listar Medios" style="max-width: 100%; border: 1px solid #ddd;">
+        <hr>
 
-        <p><strong>Endpoint:</strong> <code>GET
-                /medio_de_streaming/&lt;id&gt;</code></p>
-
-        <pre><code>@media_bp.route("/&lt;int:id_medio_de_streaming&gt;", methods=["GET"])
-@jwt_required()
-def reproducir_medio_de_streaming(id_medio_de_streaming):
-    data = medios.get(id_medio_de_streaming)
-    if not data:
-        return jsonify({'error': 'Medio not found'}), 404
-    return jsonify({"medio_de_streaming": data}), 200</code></pre>
-
+        <h4>2. Reproducir Medio <span class="jwt-badge">🔐 JWT</span></h4>
+        <p><strong>Endpoint:</strong> <code>GET /medio_de_streaming/&lt;id&gt;</code></p>
+        <p><strong>Explicación:</strong> Simula la reproducción accediendo al detalle de un medio concreto.</p>
+        <p><strong>Captura de funcionamiento:</strong></p>
+        <img src="capturas/Captura desde 2026-01-12 11-23-23.png" alt="Reproducir Medio" style="max-width: 100%; border: 1px solid #ddd;">
         <hr>
 
         <h3>c.3) Historial</h3>
-
-        <h4>Añadir al Historial <span class="jwt-badge">🔐 JWT</span></h4>
-
-        <pre><code>@historial_bp.route("/usuarios/&lt;id_usuario&gt;/historial", methods=["POST"])
-@jwt_required()
-def anadir_al_historial(id_usuario):
-    # Verificación de autorización
-    if current_user != id_usuario:
-        return jsonify({"error": "No autorizado..."}), 403
-    
-    # Verificar que el medio existe
-    if data['id_medio_de_streaming'] not in medios:
-        return jsonify({'error': 'El medio no existe'}), 404
-    
-    historial[id_usuario].append(data)
-    return jsonify({"mensaje": "Añadido al historial"}), 201</code></pre>
-
+        
+        <h4>2. Añadir al Historial <span class="jwt-badge">🔐 JWT</span></h4>
+        <p><strong>Endpoint:</strong> <code>POST /usuarios/&lt;id&gt;/historial</code></p>
+        <p><strong>Explicación:</strong> Registra la visualización de un contenido.</p>
+        <p><strong>Captura de funcionamiento sin haberse logeado, es decir, sin token de acceso</strong></p>
+        <img src="capturas/Captura desde 2026-01-12 11-29-31.png" alt="Añadir al Historial" style="max-width: 100%; border: 1px solid #ddd;">
         <hr>
 
+        <p><strong>Captura de funcionamiento:</strong></p>
+        <img src="capturas/Captura desde 2026-01-12 11-30-27.png" alt="Añadir al Historial" style="max-width: 100%; border: 1px solid #ddd;">
+        <hr>
+
+
+        <h4>1. Consultar Historial <span class="jwt-badge">🔐 JWT</span></h4>
+        <p><strong>Endpoint:</strong> <code>GET /usuarios/&lt;id&gt;/historial</code></p>
+        <p><strong>Explicación:</strong> Recupera la lista de contenidos vistos por el usuario.</p>
+        <p><strong>Captura de funcionamiento:</strong></p>
+        <img src="capturas/Captura desde 2026-01-12 11-30-48.png" alt="Consultar Historial" style="max-width: 100%; border: 1px solid #ddd;">
+        <hr>
+
+     
         <h3>c.4) Suscripciones</h3>
-
-        <h4>Pagar Suscripción <span class="jwt-badge">🔐 JWT</span></h4>
-
-        <pre><code>@suscripciones_bp.route("/usuarios/&lt;id_usuario&gt;/suscripciones", methods=["POST"])
-@jwt_required()
-def pagar_suscripcion(id_usuario):
-    # Verificación JWT...
-    suscripciones[id_usuario] = data
-    return jsonify({"suscripcion": data}), 200</code></pre>
-
+        
+        <h4>2. Pagar Suscripción <span class="jwt-badge">🔐 JWT</span></h4>
+        <p><strong>Endpoint:</strong> <code>POST /usuarios/&lt;id&gt;/suscripciones</code></p>
+        <p><strong>Explicación:</strong> Procesa el pago y activa una suscripción.</p>
+        <p><strong>Captura de funcionamiento:</strong></p>
+        <img src="capturas/Captura desde 2026-01-12 11-31-21.png" alt="Pagar Suscripción" style="max-width: 100%; border: 1px solid #ddd;">
         <hr>
 
-        <h2>d) Problemas Encontrados y Soluciones</h2>
-
-        <h3>Problemas Corregidos ✅</h3>
-
-        <table>
-            <tr>
-                <th>#</th>
-                <th>Problema</th>
-                <th>Solución</th>
-            </tr>
-            <tr>
-                <td>1</td>
-                <td><strong>Rutas duplicadas en
-                        <code>media_bp.py</code></strong> - 3 funciones con la
-                    misma ruta GET <code>/</code></td>
-                <td>Se combinaron en una sola función
-                    <code>listar_medios()</code></td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td><strong>Método HTTP incorrecto</strong> -
-                    <code>editar_medio</code> usaba DELETE</td>
-                <td>Se cambió a PUT</td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td><strong>Función huérfana</strong> sin decorador de ruta</td>
-                <td>Se integró en <code>listar_medios()</code></td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td><strong>Typo <code>.lower</code></strong> sin
-                    paréntesis</td>
-                <td>Se corrigió a <code>.lower()</code></td>
-            </tr>
-            <tr>
-                <td>5</td>
-                <td><strong>Uso incorrecto</strong> de
-                    <code>media_bp.get()</code></td>
-                <td>Se cambió a <code>medios.get(id)</code></td>
-            </tr>
-            <tr>
-                <td>6</td>
-                <td><strong>Rutas inconsistentes</strong> en
-                    <code>backend.py</code></td>
-                <td>Se quitaron prefijos incorrectos</td>
-            </tr>
-            <tr>
-                <td>7</td>
-                <td><strong>URLs incorrectas</strong> en
-                    <code>test_api.py</code></td>
-                <td>Se actualizaron todas las URLs</td>
-            </tr>
-            <tr>
-                <td>8</td>
-                <td><strong>Typo en clave</strong> <code>"Error:"</code></td>
-                <td>Se corrigió a <code>"Error"</code></td>
-            </tr>
-        </table>
-
-        <h3>Advertencias Pendientes ⚠️</h3>
-
-        <table>
-            <tr>
-                <th>#</th>
-                <th>Advertencia</th>
-                <th>Estado</th>
-            </tr>
-            <tr>
-                <td>1</td>
-                <td><strong>Datos en memoria</strong> - Se pierden al
-                    reiniciar</td>
-                <td>Intencional para simplificar</td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td><strong>JWT_SECRET_KEY puede ser None</strong></td>
-                <td>Documentar configuración</td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td><strong>Contraseñas hasheadas expuestas</strong> en GET
-                    /usuarios/</td>
-                <td>Filtrar en producción</td>
-            </tr>
-        </table>
-
+        <h4>1. Consultar Suscripción <span class="jwt-badge">🔐 JWT</span></h4>
+        <p><strong>Endpoint:</strong> <code>GET /usuarios/&lt;id&gt;/suscripciones</code></p>
+        <p><strong>Explicación:</strong> Muestra el estado actual de la suscripción del usuario.</p>
+        <p><strong>Captura de funcionamiento:</strong></p>
+        <img src="capturas/Captura desde 2026-01-12 11-31-39.png" alt="Consultar Suscripción" style="max-width: 100%; border: 1px solid #ddd;">
         <hr>
 
-        <h2>e) Modificaciones Respecto a la P3</h2>
+
+        <h4>3. Modificar Suscripción <span class="jwt-badge">🔐 JWT</span></h4>
+        <p><strong>Endpoint:</strong> <code>PUT /usuarios/&lt;id&gt;/suscripciones</code></p>
+        <p><strong>Explicación:</strong> Cambia el tipo o detalles de la suscripción existente.</p>
+        <p><strong>Captura de funcionamiento:</strong></p>
+        <img src="capturas/Captura desde 2026-01-12 11-32-02.png" alt="Modificar Suscripción" style="max-width: 100%; border: 1px solid #ddd;">
+        <hr>
+
+        <h4>4. Cancelar Suscripción <span class="jwt-badge">🔐 JWT</span></h4>
+        <p><strong>Endpoint:</strong> <code>DELETE /usuarios/&lt;id&gt;/suscripciones</code></p>
+        <p><strong>Explicación:</strong> Da de baja la suscripción del usuario.</p>
+        <p><strong>Captura de funcionamiento:</strong></p>
+        <img src="capturas/Captura desde 2026-01-12 11-32-20.png" alt="Cancelar Suscripción" style="max-width: 100%; border: 1px solid #ddd;">
+
+
+        <h2>d) Modificaciones Respecto a la P3</h2>
 
         <h3>Cambios Implementados</h3>
 
